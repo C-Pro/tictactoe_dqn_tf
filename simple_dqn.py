@@ -2,18 +2,19 @@ import tflearn as tf
 import numpy as np
 import os
 
-model_name="tictactoe.model"
-
-def getModel():
+def getModel(model_name="tictactoe.model"):
     """Build a neural network to approximate Q values
     for every possible action given board state"""
 
     n = 9 # 9 is number of cells on tictactoe board
-    tnorm = tf.initializations.uniform(minval=-1.0, maxval=1.0)
-    net = tf.input_data(shape=[None, n]) 
-    net = tf.fully_connected(net, n, activation='sigmoid', regularizer='L2', weights_init=tnorm)
-    net = tf.fully_connected(net, n, activation='sigmoid', regularizer='L2', weights_init=tnorm)
-    net = tf.fully_connected(net, n, activation='sigmoid', regularizer='L2', weights_init=tnorm)
+    #tnorm = tf.initializations.uniform(minval=-1.0, maxval=1.0)
+    net = tf.input_data(shape=[None, n])    
+    net = tf.fully_connected(net, n, activation='sigmoid', regularizer='L2')
+    net = tf.fully_connected(net, n, activation='sigmoid', regularizer='L2') 
+    net = tf.fully_connected(net, n, activation='sigmoid', regularizer='L2')
+    #net = tf.fully_connected(net, n, activation='relu', regularizer='L2')
+    #net = tf.fully_connected(net, n, activation='relu', regularizer='L2')
+    #net = tf.fully_connected(net, n, activation='relu', regularizer='L2')
     net = tf.regression(net)
 
     model = tf.DNN(net)
@@ -25,7 +26,7 @@ def getModel():
     return model
 
 
-def train(model, minibatch, y, game_number):
+def train(model, minibatch, y, game_number, model_name="tictactoe.model"):
     """"Train a dnn model given minibatch of transitions and
     corresponding precomputed Q values
     :param model: tf.DNN model representing Q-funcion
@@ -33,7 +34,7 @@ def train(model, minibatch, y, game_number):
     :param Y: target values for corresponding destination states in minibatch"""
     name = "tictactoe" + str(game_number).zfill(5)
     x = [s["state0"] for s in minibatch]
-    model.fit(x, y, n_epoch=10, validation_set=0.1, show_metric=True, run_id=name)
+    model.fit(x, y, n_epoch=50, run_id=name)
     model.save(model_name)
 
 
@@ -44,6 +45,10 @@ def calc_target(model, minibatch, gamma):
     y = []
     for ex in minibatch:
         q_values = model.predict([ex["state0"]])[0]
+        #Mark all already occupied cells as "bad"
+        for (i, cell) in enumerate(ex["state0"]):
+            if cell != 0:
+                q_values[i] = -0.1
         if ex["terminal"]:
             q_values[ex["action"]] = ex["reward"]
         else:
@@ -57,9 +62,13 @@ def calc_target2(model, minibatch, gamma):
     :param model: tf.DNN model representing Q-funcion
     :param minibatch: batch of transitions to learn on"""
     y = []
-    minibatch.reverse()    
-    for (i,ex) in enumerate(minibatch):
+    minibatch.reverse()
+    for ex in minibatch:
         q_values = model.predict([ex["state0"]])[0]
+        #Mark all already occupied cells as "bad"
+        for (i, cell) in enumerate(ex["state0"]):
+            if cell != 0:
+                q_values[i] = -0.1
         if ex["terminal"]:
             q = ex["reward"]
         else:

@@ -31,9 +31,9 @@ class Board(object):
         for mask in line_mask:
             line = "".join([self.data[i] or " " for i in mask])
             if line == "XXX":
-                return (1, True)
+                return (np.float32(1), True)
             if line == "OOO":
-                return (-1, True)
+                return (np.float32(-1), True)
 
         for cell in self.data:
             if cell == None:
