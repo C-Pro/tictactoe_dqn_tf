@@ -13,38 +13,28 @@ losses=0
 
 #start with random move generation, and slowly decrease randomness
 epsilon=0.99
-epsilon_min=0.1
-epsilon_step=(epsilon-epsilon_min)/5000
+epsilon_min=0.15
+epsilon_step=(epsilon-epsilon_min)/100000
 #gamma is future reward discount in Bellman equation
-gamma=0.8
+gamma=0.9
+
+batch_size = 5000
 
 game_result_map = {1: "X win!", -1: "O win", 0: "Draw"}
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger()
-dqn = simple_dqn.getModel()
+filenames = ["x.model", "o.model"]
+dqnX = simple_dqn.getModel(filenames[0])
+dqnO = simple_dqn.getModel(filenames[1])
 
-def invert_vector(v):
-    inv_map = {-1: 1, 1: -1}
-    return [inv_map[x] for x in v]
+global_replay = [[],[]]
+global_y = [[],[]]
+dqn = [dqnX, dqnO]
 
-def invert_replay(replay):
-    """Append inverted replay to original one"""
-    inverted_rep = []
-    for step in replay:
-        inverted_rep.append({"state0": invert_vector(replay["state0"]),
-                             "state1": invert_vector(replay["state1"]),
-                             "action": replay["a"],
-                             "reward": -replay["reward"]
-                             })
-    return inverted_rep
-
-
-global_replay = []
-global_y = []
 
 while True:
-    replay = []
+    replay = [[],[]]
 
     b = board.Board()
     #game state is pair of Reward,Terminal
@@ -55,50 +45,64 @@ while True:
     step = 0
 
     try:
-        log.info("Starting game %d",game_number)
+        log.debug("Starting game %d",game_number)
         possible_moves = set([i for i in range(0,9)])
+        prev_state = None
+        prev_board_vec = None
         #repeat until the game is ended
         while r[1] == False:
-            step = step + 1
+            side = step % 2
             s = b.get_vec()
-            #play next move as X
-            (a, r, ss) = play.play_move(dqn, b, possible_moves, epsilon)
+            #play next move
+            (a, r, ss) = play.play_move(dqn[side], b, possible_moves, epsilon)
+            #save previous move and current reward to another side's replay
+            if prev_state:
+                replay[1-side].append({"state0": prev_board_vec,
+                                      "state1": ss,
+                                      "action": prev_state[0],
+                                      #invert revard for Os
+                                      "reward": r[0] if (1-side)==0 else -r[0],
+                                      "terminal": r[1]})
+            #for terminal moves save current move to this side replay
+            if r[1]:
+                replay[side].append({"state0": s,
+                                     "state1": ss,
+                                     "action": a,
+                                     #invert revard for Os
+                                     "reward": r[0] if side==0 else -r[0],
+                                     "terminal": r[1]})
+            prev_state = (a, r, ss)
+            prev_board_vec = s
+            step = step + 1
 
-            if r[1] == False:
-                #play next move as O
-                (aO, r, ss) = play.play_move(dqn, b, possible_moves, epsilon)
-            #save move to replay
-            replay.append({"state0": s,
-                           "state1": ss,
-                           "action": a,
-                           "reward": r[0],
-                           "terminal": r[1]})
-
-        log.info("Game %s ended in %s steps. %s", game_number, step, game_result_map[r[0]])
         game_number = game_number + 1
         if r[0] == 1:
             wins = wins + 1
         if r[0] == -1:
             losses = losses + 1
-        log.info("Wining rate: %s", wins/game_number)
-        log.info("Losing rate: %s", losses/game_number)
 
-        if random.random() < epsilon + 10:
-            y = simple_dqn.calc_target2(dqn, replay, gamma)
-        else:
-            random.shuffle(replay)
-            # Use Bellman equation and model prediction to backpropagate reward
-            y = simple_dqn.calc_target(dqn, replay, gamma)
-            # Train model on replay
+        for side in range(2):
+            if random.random() < epsilon + 0.5:
+                y = simple_dqn.calc_target2(dqn[side], replay[side], gamma)
+            else:
+                random.shuffle(replay[side])
+                # Use Bellman equation and model prediction to backpropagate reward
+                y = simple_dqn.calc_target(dqn[side], replay[side], gamma)
 
-        global_replay = global_replay + replay
-        global_y = global_y + y
-        if game_number % 1000 == 0:
-            simple_dqn.train(dqn, global_replay, global_y, game_number)
-            global_replay = []
-            global_y = []
+            global_replay[side] = global_replay[side] + replay[side]
+            global_y[side] = global_y [side]+ y
 
-        # Decrease epsilon with every step
+        if game_number % batch_size == 0:
+            log.info("After %s games played", game_number)
+            log.info("  Wining rate for last %d games: %s", batch_size, wins/batch_size)
+            log.info("  Losing rate for last %d games: %s", batch_size, losses/batch_size)
+            simple_dqn.train(dqn[0], global_replay[0], global_y[0], game_number, filenames[0])
+            simple_dqn.train(dqn[1], global_replay[1], global_y[1], game_number, filenames[1])
+            global_replay = [[],[]]
+            global_y = [[],[]]
+            wins = losses = 0
+
+        # Decrease epsilon with every game
         if epsilon > epsilon_min:
             epsilon = epsilon - epsilon_step
     except KeyboardInterrupt:

@@ -16,15 +16,14 @@ def play_move(model, board, possible_moves, epsilon=0):
             board.invert()
             inverted = True
         s = board.get_vec()
-        #calculate q for all actions using dqn
-        p = model.predict([s])[0]
-        print(board)
-        print(p)
+
         #make a random move or use dqn prediction
         if random.random() < epsilon:
             #a is an action(step) to be performed
             a = random.choice(list(possible_moves))
         else:
+            #calculate q for all actions using dqn
+            p = model.predict([s])[0]
             #select best action based on model prediction
             a = np.argmax(p)
             if a not in possible_moves:
@@ -75,9 +74,14 @@ if __name__ == '__main__':
                     game_state=r
                     break
                 print(b)
-                print("Your move")
-                m = int(input())
-                r = b.make_move(m)
+                r = None
+                while r ==None:
+                    print("Your move")
+                    m = int(input())
+                    r = b.make_move(m)
+                    if r == None:
+                        print("Wrong move!")
+                    possible_moves.remove(m)
                 print(b)
                 if r[1]:
                     game_state=r
