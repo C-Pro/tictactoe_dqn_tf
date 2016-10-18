@@ -1,11 +1,10 @@
-import numpy as np
 
 class Board(object):
     """Tic tac toe board representation class"""
 
     def __init__(self, data=None, turn=1):
         """Initializes new tictactoe Board
-        :param data: 9 element list. 0 element is top left corner, 8 is bottom right. Use np.float32(1) for X and np.float32(-1) for O characters and None for empty squares
+        :param data: 9 element list. 0 element is top left corner, 8 is bottom right. Use 1 for X and -1 for O characters and None for empty squares
         if data is None, empty board (filed with None) is created
         :param turn: 1 is for X's turn -1 for O's turn"""
         self.turn = turn
@@ -31,9 +30,9 @@ class Board(object):
         for mask in line_mask:
             line = "".join([self.data[i] or " " for i in mask])
             if line == "XXX":
-                return (np.float32(1), True)
+                return (1, True)
             if line == "OOO":
-                return (np.float32(-1), True)
+                return (-1, True)
 
         for cell in self.data:
             if cell == None:
@@ -43,9 +42,9 @@ class Board(object):
 
     def get_vec(self, ):
         "Float vector board representation for ML applications"
-        float_map = {"X": np.float32(1),
-                     "O": np.float32(-1),
-                     None: np.float32(0)}
+        float_map = {"X": 1,
+                     "O": -1,
+                     None: 0}
         return [float_map[c] for c in self.data]
 
     def invert(self):
@@ -67,7 +66,7 @@ class Board(object):
         self.turn = -self.turn
 
         return self.analyze_state()
- 
+
     def __str__(self):
         "String representation for debugging output"
         s = "|".join([c or " " for c in self.data[0:3]]) + "\n"
@@ -76,3 +75,4 @@ class Board(object):
         s += "-----\n"
         s += "|".join([c or " " for c in self.data[6:9]])
         return s
+

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import board
 import simple_dqn
 import numpy as np
@@ -26,8 +28,9 @@ def play_move(model, board, possible_moves, epsilon=0):
             a = random.choice(list(possible_moves))
         else:
             #calculate q for all actions using dqn
-            p = model.predict([s])[0]
+            p = model.predict(simple_dqn.reshape(s))[0]
             #select best action based on model prediction
+            p = [x if i in possible_moves else -1.0 for (i,x) in enumerate(p)]
             a = np.argmax(p)
             if a not in possible_moves:
                 a = random.choice(list(possible_moves))
@@ -74,12 +77,12 @@ if __name__ == '__main__':
                 side = step % 2
                 print(b)
                 if print_eval:
-                    p = dqn[side].predict([b.get_vec()])[0]
+                    p = dqn[side][0].predict(simple_dqn.reshape(b.get_vec()))[0]
                     print_weights(p)
                 r = None
                 if side in computer_plays:
                     print("My move:")
-                    (a, r, ss, possible_moves) = play_move(dqn[side], b, possible_moves)
+                    (a, r, ss, possible_moves) = play_move(dqn[side][0], b, possible_moves)
                 else:
                     while r ==None:
                         print("Your move:")
