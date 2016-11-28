@@ -8,6 +8,8 @@ import random
 import logging
 import sys
 
+game_tree = {}
+
 def print_weights(q):
     '''Pretty-print Q values on board'''
     maxval = np.max(q)
@@ -28,7 +30,7 @@ def play_move(model, board, possible_moves, epsilon=0):
             a = random.choice(list(possible_moves))
         else:
             #calculate q for all actions using dqn
-            p = model.predict(simple_dqn.reshape(s))[0]
+            p = model.predict([s])[0]
             #select best action based on model prediction
             p = [x if i in possible_moves else -1.0 for (i,x) in enumerate(p)]
             a = np.argmax(p)
@@ -39,6 +41,27 @@ def play_move(model, board, possible_moves, epsilon=0):
             continue
         #remove action from possible moves set for this game
         possible_moves.remove(a)
+        ss = board.get_vec()
+        return (a,r,ss, possible_moves)
+
+def game_is_terminal(game):
+    b = board.Board()
+    for a in game:
+        r = b.make_move(a)
+        if r[0]:
+            return 0.0 not in b.get_vec()
+    return False
+
+
+def play_determ_move(model, board, possible_moves, game):
+    """Play next move on a board"""
+    r = None
+    while r == None:
+        a = possible_moves[0]
+        possible_moves = sorted(possible_moves)[1:]
+        r = board.make_move(a)
+        if r == None:
+            continue
         ss = board.get_vec()
         return (a,r,ss, possible_moves)
 
@@ -60,7 +83,7 @@ if __name__ == '__main__':
 
     logging.basicConfig(level=logging.INFO)
     log = logging.getLogger()
-    dqn = [simple_dqn.getModel("x.model"), simple_dqn.getModel("o.model")]
+    dqn = [simple_dqn.getModel("X0.model"), simple_dqn.getModel("O0.model")]
 
     while True:
         b = board.Board()
@@ -77,7 +100,7 @@ if __name__ == '__main__':
                 side = step % 2
                 print(b)
                 if print_eval:
-                    p = dqn[side][0].predict(simple_dqn.reshape(b.get_vec()))[0]
+                    p = dqn[side][0].predict([b.get_vec()])[0]
                     print_weights(p)
                 r = None
                 if side in computer_plays:

@@ -75,4 +75,3 @@ class Board(object):
         s += "-----\n"
         s += "|".join([c or " " for c in self.data[6:9]])
         return s
-
