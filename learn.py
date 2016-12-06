@@ -10,12 +10,12 @@ import sys
 
 
 # number of networks of each color to train
-num_nets=3
+num_nets=9
 # Which nets are playing
 nets = [0,1]
 
 #start with random move generation, and slowly decrease randomness
-epsilon=0.99
+epsilon=0.4
 epsilon_min=0.1
 epsilon_step=(epsilon-epsilon_min)/10000000
 #gamma is future reward discount in Bellman equation
@@ -117,12 +117,16 @@ while True:
             losses = losses + 1
 
         if r[0] != 0:
-            replay[0] = replay[0] + repl_tmp[0]
-            replay[1] = replay[1] + repl_tmp[1]
+            for side in range(2):
+                replay[side].extend(repl_tmp[side])
+                #for b in repl_tmp[side]:
+                #    replay[side].append(b)
         elif random.random() < 0.1:
         # add draws to training set seldom
-            replay[0] = replay[0] + repl_tmp[0]
-            replay[1] = replay[1] + repl_tmp[1]
+            for side in range(2):
+                replay[side].extend(repl_tmp[side])
+                #for b in repl_tmp[side]:
+                #    replay[side].append(b)
 
         # batch ended
         if game_number % batch_size == 0:
@@ -137,6 +141,7 @@ while True:
             log.info("  Wining rate for last %d games: %s", batch_size, win_rate)
             log.info("  Losing rate for last %d games: %s", batch_size, loss_rate)
             log.info("  Nets loss rate: %s", dqn_loss)
+            log.info("  Current epsilon %f", epsilon)
             log.info("Sample weights for empty board:")
             play.print_weights(dqn[nets[0]][0].predict([[0,0,0,0,0,0,0,0,0]])[0])
             for side in range(2):
@@ -155,11 +160,11 @@ while True:
             # Randomly select two networks to play against each other
             nets = [int(random.random()*num_nets)*2, int(random.random()*num_nets)*2+1]
 
-        if game_number % 200001 == 0:
-            random.shuffle(replay[0])
-            replay[0] = replay[0][:100000]
-            random.shuffle(replay[1])
-            replay[1] = replay[1][:100000]
+        if len(replay[0]) > 50000:
+            #random.shuffle(replay[0])
+            replay[0] = replay[0][-50000:]
+            #random.shuffle(replay[1])
+            replay[1] = replay[1][-50000:]
 
 
     except KeyboardInterrupt:

@@ -31,7 +31,7 @@ def reshape(batch):
     return np.reshape(batch, (-1, 3, 3, 1))
 
 
-def train(model, g, minibatch, y, game_number, model_name, n_epoch=1):
+def train(model, g, minibatch, y, game_number, model_name, n_epoch=2):
     """"Train a dnn model given minibatch of transitions and
     corresponding precomputed Q values
     :param model: tf.DNN model representing Q-funcion
@@ -40,7 +40,7 @@ def train(model, g, minibatch, y, game_number, model_name, n_epoch=1):
     name = model_name + str(game_number).zfill(5)
     # x = reshape([s["state0"] for s in minibatch])
     x = [s["state0"] for s in minibatch]
-    model.fit(x, y, n_epoch=n_epoch, validation_set=0, shuffle=True, run_id=name)
+    model.fit(x, y, n_epoch=n_epoch, validation_set=0.1, shuffle=True, run_id=name)
     with g.as_default():
         model.save(model_name)
 

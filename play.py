@@ -83,7 +83,7 @@ if __name__ == '__main__':
 
     logging.basicConfig(level=logging.INFO)
     log = logging.getLogger()
-    dqn = [simple_dqn.getModel("X0.model"), simple_dqn.getModel("O0.model")]
+    dqn = [simple_dqn.getModel("X4.model"), simple_dqn.getModel("O0.model")]
 
     while True:
         b = board.Board()
