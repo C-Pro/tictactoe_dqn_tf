@@ -10,11 +10,11 @@ def getModel(model_name):
 
     g = tensorflow.Graph()
     with g.as_default():
-        tnorm = tf.initializations.uniform(minval=-1.0, maxval=1.0)
+        #tnorm = tf.initializations.uniform(minval=-1.0, maxval=1.0)
 
         net = tf.input_data(shape=[None, n])
-        net = tf.fully_connected(net, 256, activation='relu', weights_init=tnorm)
-        net = tf.fully_connected(net, n, weights_init=tnorm)
+        net = tf.fully_connected(net, 256, activation='relu') #, weights_init=tnorm)
+        net = tf.fully_connected(net, n) #, weights_init=tnorm)
 
         net = tf.regression(net, optimizer='rmsprop', loss='mean_square', learning_rate=0.001)
         model = tf.DNN(net)
