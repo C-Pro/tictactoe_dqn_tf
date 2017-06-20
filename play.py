@@ -8,7 +8,6 @@ import random
 import logging
 import sys
 
-game_tree = {}
 
 def print_weights(q):
     '''Pretty-print Q values on board'''
@@ -18,8 +17,10 @@ def print_weights(q):
                 colored("{: 04.3f}".format(x),"red") for x in q[l*3:l*3+3]])
         print(s)
 
-def play_move(model, board, possible_moves, epsilon=0):
+def play_move(model, board, possible_moves=None, epsilon=0):
     """Play next move on a board"""
+    if not possible_moves:
+        possible_moves = [i for i in range(9) if board.data[i]==' ']
     r = None #move result
     while r == None:
         s = board.get_vec()
@@ -52,19 +53,6 @@ def game_is_terminal(game):
             return 0.0 not in b.get_vec()
     return False
 
-
-def play_determ_move(model, board, possible_moves, game):
-    """Play next move on a board"""
-    r = None
-    while r == None:
-        a = possible_moves[0]
-        possible_moves = sorted(possible_moves)[1:]
-        r = board.make_move(a)
-        if r == None:
-            continue
-        ss = board.get_vec()
-        return (a,r,ss, possible_moves)
-
 if __name__ == '__main__':
 
     #game number counter
@@ -83,7 +71,7 @@ if __name__ == '__main__':
 
     logging.basicConfig(level=logging.INFO)
     log = logging.getLogger()
-    dqn = [simple_dqn.getModel("X4.model"), simple_dqn.getModel("O0.model")]
+    dqn = [simple_dqn.getModel("X0.model.index"), simple_dqn.getModel("O0.model.index")]
 
     while True:
         b = board.Board()

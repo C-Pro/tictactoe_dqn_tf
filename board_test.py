@@ -6,13 +6,13 @@ class TestBoard(unittest.TestCase):
 
     def test_analyze(self):
         test_tab = [[None,(0,False)],
-                    [[None,None,None,None,None,None,None,None,None],(0,False)],
-                    [["X","X","X",None,None,None,None,None,None],(1,True)],
+                    [[" "," "," "," "," "," "," "," "," "],(0,False)],
+                    [["X","X","X"," "," "," "," "," "," "],(1,True)],
                     [["X","X","X","X","X","X","X","X","X"],(1,True)],
-                    [["X","O","O","X",None,None,"X",None,None],(1,True)],
-                    [["O","O","O",None,None,None,None,None,None],(-1,True)],
-                    [["O","X","O",None,"O",None,"O",None,None],(-1,True)],
-                    [["O","X","O",None,"O",None,"X",None,None],(0,False)]]
+                    [["X","O","O","X"," "," ","X"," "," "],(1,True)],
+                    [["O","O","O"," "," "," "," "," "," "],(-1,True)],
+                    [["O","X","O"," ","O"," ","O"," "," "],(-1,True)],
+                    [["O","X","O"," ","O"," ","X"," "," "],(0,False)]]
         for test in test_tab:
             b = board.Board(test[0])
             r = b.analyze_state()
@@ -22,18 +22,18 @@ class TestBoard(unittest.TestCase):
 
     def test_get_vec(self):
         test_tab = [[None,[np.float32(0)]*9],
-                    [["X","O","X",None,None,None,None,None,None],
+                    [["X","O","X"," "," "," "," "," "," "],
                     [np.float32(1),np.float32(-1),np.float32(1)] + [np.float32(0)]*6]]
         for test in test_tab:
             self.assertEqual(board.Board(test[0]).get_vec(),test[1])
 
     def test_make_move(self):
-        test_tab = [[None,1,0,(0,False),["X",None,None,None,None,None,None,None,None]],
-                    [None,-1,0,(0,False),["O",None,None,None,None,None,None,None,None]],
+        test_tab = [[None,1,0,(0,False),["X"," "," "," "," "," "," "," "," "]],
+                    [None,-1,0,(0,False),["O"," "," "," "," "," "," "," "," "]],
                     [["X","X","X","X","X","X","X","X","X"],1,3,None,["X","X","X","X","X","X","X","X","X"]],
                     [["X","X","X","X","X","X","X","X","X"],-1,5,None,["X","X","X","X","X","X","X","X","X"]],
-                    [["X","X",None,None,None,None,None,None,None],1,2,(1,True),["X","X","X",None,None,None,None,None,None]],
-                    [["O","O",None,None,None,None,None,None,None],-1,2,(-1,True),["O","O","O",None,None,None,None,None,None]]]
+                    [["X","X"," "," "," "," "," "," "," "],1,2,(1,True),["X","X","X"," "," "," "," "," "," "]],
+                    [["O","O"," "," "," "," "," "," "," "],-1,2,(-1,True),["O","O","O"," "," "," "," "," "," "]]]
         for test in test_tab:
             b = board.Board(test[0],test[1])
             print("Pre move")

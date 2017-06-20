@@ -10,18 +10,18 @@ import sys
 
 
 # number of networks of each color to train
-num_nets=9
+num_nets=4
 # Which nets are playing
 nets = [0,1]
 
 #start with random move generation, and slowly decrease randomness
 epsilon=0.4
 epsilon_min=0.1
-epsilon_step=(epsilon-epsilon_min)/10000000
+epsilon_step=(epsilon-epsilon_min)/500000
 #gamma is future reward discount in Bellman equation
 gamma=0.99
 
-batch_size = 10000
+batch_size = 5000
 min_batch_size = 100
 
 #game number counter

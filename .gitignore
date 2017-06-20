@@ -53,9 +53,9 @@ docs/_build/
 # PyBuilder
 target/
 
-*.model
-*.model.meta
+*.model.*
 *.swp
 .vscode
+.ve
 checkpoint
 

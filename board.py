@@ -2,18 +2,25 @@
 class Board(object):
     """Tic tac toe board representation class"""
 
-    def __init__(self, data=None, turn=1):
+    def __init__(self, data=None, turn=None):
         """Initializes new tictactoe Board
-        :param data: 9 element list. 0 element is top left corner, 8 is bottom right. Use 1 for X and -1 for O characters and None for empty squares
+        :param data: 9 element list. 0 element is top left corner, 8 is bottom right. Use X and O characters and space for empty squares
         if data is None, empty board (filed with None) is created
         :param turn: 1 is for X's turn -1 for O's turn"""
-        self.turn = turn
         if not data:
-            self.data = [None]*9
+            self.data = [' ']*9
         elif len(data) != 9:
             raise ValueError("Board size should be 9")
         else:
             self.data = data
+        if turn:
+            self.turn = turn
+        else:
+            turn = len([c for c in self.data if c != ' '])%2
+            if turn == 0:
+                self.turn = 1
+            else:
+                self.turn = -1
 
     def analyze_state(self):
         """Analyze board data and return
@@ -28,14 +35,14 @@ class Board(object):
                      [0,4,8],[2,4,6]]         #diagonals
 
         for mask in line_mask:
-            line = "".join([self.data[i] or " " for i in mask])
+            line = "".join([self.data[i] for i in mask])
             if line == "XXX":
                 return (1, True)
             if line == "OOO":
                 return (-1, True)
 
         for cell in self.data:
-            if cell == None:
+            if cell == ' ':
                 return (0, False)
 
         return (0, True)
@@ -44,7 +51,7 @@ class Board(object):
         "Float vector board representation for ML applications"
         float_map = {"X": 1,
                      "O": -1,
-                     None: 0}
+                     " ": 0}
         return [float_map[c] for c in self.data]
 
     def invert(self):
@@ -59,7 +66,7 @@ class Board(object):
     def make_move(self, action):
         """Makes move on current board (modifies its state). Returns reward and terminal status, or None if move makes no sense.
         :param action: int in range(0,9) - board cell to make move on"""
-        if self.data[action] != None:
+        if self.data[action] != ' ':
             return None
         turn_map = {1:"X", -1:"O"}
         self.data[action] = turn_map[self.turn]
@@ -69,9 +76,9 @@ class Board(object):
 
     def __str__(self):
         "String representation for debugging output"
-        s = "|".join([c or " " for c in self.data[0:3]]) + "\n"
+        s = "|".join([c for c in self.data[0:3]]) + "\n"
         s += "-----\n"
-        s += "|".join([c or " " for c in self.data[3:6]]) + "\n"
+        s += "|".join([c for c in self.data[3:6]]) + "\n"
         s += "-----\n"
-        s += "|".join([c or " " for c in self.data[6:9]])
+        s += "|".join([c for c in self.data[6:9]])
         return s

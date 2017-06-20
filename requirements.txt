@@ -1,0 +1,6 @@
+numpy==1.13.0
+protobuf==3.3.0
+six==1.10.0
+tensorflow-gpu==1.2.0
+termcolor==1.1.0
+tflearn==0.3.2

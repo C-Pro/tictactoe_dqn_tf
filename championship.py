@@ -7,9 +7,9 @@ from glob import glob
 import logging
 
 #how many rounds to play
-ROUNDS = 100
+ROUNDS = 1000
 #probability of random move
-EPSILON = 0.3
+EPSILON = 0.15
 
 if __name__ == '__main__':
 
@@ -18,7 +18,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     log = logging.getLogger()
 
-    models = [glob("X*.model"),glob("O*.model")]
+    models = [glob("X*.model.index"),glob("O*.model.index")]
     scores = [[0]*len(models[0]),[0]*len(models[1])]
     dqns = [[simple_dqn.getModel(models[0][i]) for i in range(len(models[0]))],
             [simple_dqn.getModel(models[1][i]) for i in range(len(models[1]))]]
