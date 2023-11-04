@@ -10,18 +10,18 @@ import sys
 
 
 # number of networks of each color to train
-num_nets=4
+num_nets=3
 # Which nets are playing
 nets = [0,1]
 
 #start with random move generation, and slowly decrease randomness
-epsilon=0.4
-epsilon_min=0.1
-epsilon_step=(epsilon-epsilon_min)/500000
+epsilon=0.9
+epsilon_min=0.5
+epsilon_step=(epsilon-epsilon_min)/900000
 #gamma is future reward discount in Bellman equation
-gamma=0.99
+gamma=0.8
 
-batch_size = 5000
+batch_size = 50000
 min_batch_size = 100
 
 #game number counter
@@ -147,9 +147,8 @@ while True:
             for side in range(2):
                 batch = sample_replay(replay[side], gamma, batch_size)
                 # Use Bellman equation and model prediction to backpropagate reward
-                #y = simple_dqn.calc_target(dqn[int(random.random()*num_nets)*2+side][0], batch, gamma)
                 y = simple_dqn.calc_target(dqn[nets[side]][0], batch, gamma)
-                simple_dqn.train(*dqn[nets[side]], batch, y, game_number, filenames[nets[side]]) #, int(10*(batch_size/len(batch))))
+                simple_dqn.train(*dqn[nets[side]], batch, y, game_number, filenames[nets[side]])
             wins = losses = 0
             # Decrease epsilon
             if epsilon > epsilon_min:

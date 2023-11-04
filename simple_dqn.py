@@ -13,10 +13,12 @@ def getModel(model_name):
         #tnorm = tf.initializations.uniform(minval=-1.0, maxval=1.0)
 
         net = tf.input_data(shape=[None, n])
-        net = tf.fully_connected(net, 256, activation='relu') #, weights_init=tnorm)
-        net = tf.fully_connected(net, n) #, weights_init=tnorm)
+        net = tf.fully_connected(net, n, activation='sigmoid')#, weights_init=tnorm)
+        net = tf.fully_connected(net, n, activation='sigmoid')#, weights_init=tnorm)
+        net = tf.dropout(net, 0.8)
+        net = tf.fully_connected(net, n, activation='sigmoid')#, weights_init=tnorm)
 
-        net = tf.regression(net, optimizer='rmsprop', loss='mean_square', learning_rate=0.001)
+        net = tf.regression(net, optimizer='adam', learning_rate=0.0001)
         model = tf.DNN(net)
 
         if os.path.isfile(model_name + ".index"):

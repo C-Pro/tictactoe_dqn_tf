@@ -58,10 +58,12 @@ if __name__ == '__main__':
     #game number counter
     game_number=0
     wins=0
+    epsilon=0
 
     computer_plays = [0]
     if "-xo" in sys.argv:
         computer_plays = [0,1]
+        epsilon=0.3
     elif "-o" in sys.argv:
         computer_plays = [1]
 
@@ -71,7 +73,7 @@ if __name__ == '__main__':
 
     logging.basicConfig(level=logging.INFO)
     log = logging.getLogger()
-    dqn = [simple_dqn.getModel("X0.model.index"), simple_dqn.getModel("O0.model.index")]
+    dqn = [simple_dqn.getModel("X2.model.index"), simple_dqn.getModel("O2.model.index")]
 
     while True:
         b = board.Board()
@@ -93,7 +95,7 @@ if __name__ == '__main__':
                 r = None
                 if side in computer_plays:
                     print("My move:")
-                    (a, r, ss, possible_moves) = play_move(dqn[side][0], b, possible_moves)
+                    (a, r, ss, possible_moves) = play_move(dqn[side][0], b, possible_moves, epsilon)
                 else:
                     while r ==None:
                         print("Your move:")

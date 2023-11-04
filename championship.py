@@ -7,7 +7,7 @@ from glob import glob
 import logging
 
 #how many rounds to play
-ROUNDS = 1000
+ROUNDS = 30
 #probability of random move
 EPSILON = 0.15
 
